@@ -173,7 +173,7 @@
                     apiInput = `https://www.tiktok.com/@${input}`;
                 }
                 
-                const response = await fetch(`https://tiktok-api-nodejs.vercel.app/tiktok?input=${encodeURIComponent(apiInput)}`);
+                const response = await fetch(`/tiktok?input=${encodeURIComponent(apiInput)}`);
                 const data = await response.json();
                 
                 if (!data.success || !data.data.userInfo) {
