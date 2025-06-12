@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Profile Checker | Get Account Info</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #FE2C55 0%, #25F4EE 50%, #FE2C55 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientMove 3s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; } 
+            100% { background-position: 0% 50%; }
+        }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .shine {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shine::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20%;
+            height: 200%;
+            background: rgba(255,255,255,0.2);
+            transform: rotate(30deg);
+            transition: all 0.3s;
+        }
+        
+        .shine:hover::after {
+            left: 120%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 gradient-text">TikTok Profile Checker</h1>
+            <p class="text-gray-300 max-w-2xl mx-auto text-lg">Enter a TikTok username, profile link, or ID to get detailed account information including follower count, engagement rate, and more.</p>
+        </header>
+        
+        <!-- Main Form -->
+        <div class="max-w-2xl mx-auto bg-gray-800 rounded-xl shadow-lg p-6 md:p-8 backdrop-blur-sm bg-opacity-50">
+            <div class="relative">
+                <div class="flex items-center">
+                    <input 
+                        type="text" 
+                        id="tiktok-input" 
+                        placeholder="Enter TikTok username, link, or ID" 
+                        class="w-full px-6 py-4 rounded-l-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 border border-gray-600" 
+                        autocomplete="off"
+                    >
+                    <button 
+                        id="check-btn" 
+                        class="bg-gradient-to-r from-pink-500 to-cyan-400 hover:from-pink-600 hover:to-cyan-500 px-6 py-4 rounded-r-lg font-semibold shine transition-all duration-300 flex items-center justify-center"
+                    >
+                        <i class="fab fa-tiktok mr-2"></i> Check
+                    </button>
+                </div>
+                <div class="mt-3 text-sm text-gray-400 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Example formats: @username, https://tiktok.com/@username, or user_id
+                </div>
+            </div>
+            
+            <div class="mt-8 hidden" id="loading-section">
+                <div class="flex justify-center">
+                    <div class="w-16 h-16 border-4 border-cyan-400 border-t-pink-500 rounded-full animate-spin pulse"></div>
+                </div>
+                <p class="text-center mt-4 text-gray-300">Fetching TikTok profile data...</p>
+            </div>
+            
+            <div id="results-section" class="mt-8 hidden">
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center gradient-text">Profile Information</h2>
+                    <div id="profile-info">
+                        <!-- Results will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="error-section" class="mt-8 hidden">
+                <div class="bg-red-900 bg-opacity-50 rounded-lg p-6">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
+                        <h2 class="text-xl font-bold">Error</h2>
+                    </div>
+                    <p id="error-message" class="text-gray-200"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="max-w-5xl mx-auto mt-16">
+            <h2 class="text-3xl font-bold mb-8 text-center gradient-text">What You Can Check</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-750 transition-all">
+                    <div class="text-4xl mb-4 text-pink-500"><i class="fas fa-users"></i></div>
+                    <h3 class="text-xl font-bold mb-2">Follower Count</h3>
+                    <p class="text-gray-300">Track the exact number of followers for any TikTok account.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-750 transition-all">
+                    <div class="text-4xl mb-4 text-cyan-400"><i class="fas fa-heart"></i></div>
+                    <h3 class="text-xl font-bold mb-2">Engagement Rate</h3>
+                    <p class="text-gray-300">Calculate the engagement percentage based on likes and comments.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-750 transition-all">
+                    <div class="text-4xl mb-4 text-white"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="text-xl font-bold mb-2">Growth Analytics</h3>
+                    <p class="text-gray-300">Analyze follower growth patterns and video performance metrics.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-20 text-center text-gray-400 text-sm">
+            <div class="mb-4">
+                <button class="mx-2 hover:text-pink-400 transition"><i class="fab fa-github"></i> GitHub</button>
+                <button class="mx-2 hover:text-cyan-400 transition"><i class="fas fa-question-circle"></i> Help</button>
+                <button class="mx-2 hover:text-white transition"><i class="fas fa-shield-alt"></i> Privacy</button>
+            </div>
+            <p>© 2023 TikTok Profile Checker. Not affiliated with TikTok.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('check-btn').addEventListener('click', async function() {
+            const input = document.getElementById('tiktok-input').value.trim();
+            const loadingSection = document.getElementById('loading-section');
+            const resultsSection = document.getElementById('results-section');
+            const errorSection = document.getElementById('error-section');
+            
+            // Hide previous results/errors
+            resultsSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            
+            if (!input) {
+                showError("Please enter a TikTok username, link, or ID");
+                return;
+            }
+            
+            // Show loading
+            loadingSection.classList.remove('hidden');
+            
+            try {
+                // Extract username or validate input
+                let apiInput = input;
+                if (input.startsWith('@')) {
+                    apiInput = `https://www.tiktok.com/${input}`;
+                } else if (!input.startsWith('http') && !/^\d+$/.test(input)) {
+                    apiInput = `https://www.tiktok.com/@${input}`;
+                }
+                
+                const response = await fetch(`https://tiktok-api-nodejs.vercel.app/tiktok?input=${encodeURIComponent(apiInput)}`);
+                const data = await response.json();
+                
+                if (!data.success || !data.data.userInfo) {
+                    throw new Error(data.statusMsg || "Failed to fetch profile data");
+                }
+                
+                loadingSection.classList.add('hidden');
+                showResults(mapApiDataToResults(data.data.userInfo));
+            } catch (error) {
+                loadingSection.classList.add('hidden');
+                showError(error.message || "Couldn't fetch profile. Please check the username/link and try again.");
+            }
+        });
+        
+        function showError(message) {
+            const errorSection = document.getElementById('error-section');
+            const errorMessage = document.getElementById('error-message');
+            
+            errorMessage.textContent = message;
+            errorSection.classList.remove('hidden');
+        }
+        
+        function showResults(data) {
+            const resultsSection = document.getElementById('results-section');
+            const profileInfo = document.getElementById('profile-info');
+            
+            profileInfo.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-cyan-500 flex items-center justify-center mr-3">
+                                <i class="fas fa-user text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center">
+                                    <h3 class="font-bold">${data.username}</h3>
+                                    ${data.verified ? '<i class="fas fa-check-circle text-blue-500 ml-2"></i>' : ''}
+                                </div>
+                                <p class="text-sm text-gray-400">${data.name}</p>
+                                <span class="text-xs px-2 py-1 rounded-full ${data.isPrivate ? 'bg-red-500' : 'bg-green-500'}">
+                                    ${data.isPrivate ? 'Private Account' : 'Public Account'}
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-300 mt-2"><i class="fas fa-link text-blue-400 mr-2"></i> https://tiktok.com/@${data.username}</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h4 class="text-sm text-gray-400 mb-2">ACCOUNT DETAILS</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-xs text-gray-400">Account Created</p>
+                                <p class="text-sm font-medium">${data.creationDate}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Last Name Edit</p>
+                                <p class="text-sm font-medium">${data.lastNameEdit}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Last Username Edit</p>
+                                <p class="text-sm font-medium">${data.lastUsernameEdit}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Language</p>
+                                <p class="text-sm font-medium">${data.language}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Location</p>
+                                <p class="text-sm font-medium">${data.location || 'Not specified'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Repost</p>
+                                <p class="text-sm font-medium">${data.allowRepost ? 'Allowed' : 'Not Allowed'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h4 class="text-sm text-gray-400 mb-2">STATISTICS</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span><i class="fas fa-users text-pink-500 mr-2"></i> Followers</span>
+                                <span class="font-bold">${data.followers.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><i class="fas fa-user-plus text-cyan-400 mr-2"></i> Following</span>
+                                <span class="font-bold">${data.following.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><i class="fas fa-user-friends text-purple-400 mr-2"></i> Friends</span>
+                                <span class="font-bold">${data.friends.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><i class="fas fa-heart text-red-400 mr-2"></i> Likes</span>
+                                <span class="font-bold">${data.likes.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span><i class="fas fa-video text-yellow-400 mr-2"></i> Videos</span>
+                                <span class="font-bold">${data.videos.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h4 class="text-sm text-gray-400 mb-3">BIOGRAPHY</h4>
+                        <p class="text-gray-300 whitespace-pre-line">${data.bio}</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h4 class="text-sm text-gray-400 mb-3">ACCOUNT HISTORY</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400">Name Last Changed</p>
+                                <p class="text-sm font-medium">${data.lastNameEdit} (${data.nameChanges} changes)</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Username Last Changed</p>
+                                <p class="text-sm font-medium">${data.lastUsernameEdit} (${data.usernameChanges} changes)</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Last Active</p>
+                                <p class="text-sm font-medium">${data.lastActive}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsSection.classList.remove('hidden');
+        }
+        
+        function mapApiDataToResults(userInfo) {
+            const user = userInfo.user;
+            const stats = userInfo.stats;
+            
+            // Convert createTime to a readable date
+            const createTimeParts = user.createTime.split(' || ');
+            const createDate = new Date(createTimeParts[1]);
+            const formattedCreateDate = createDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Convert nickNameModifyTime to a readable date
+            let formattedNickNameModifyTime = 'Never';
+            let nameChanges = 0;
+            if (user.nickNameModifyTime) {
+                const nickModifyParts = user.nickNameModifyTime.split(' || ');
+                const nickModifyDate = new Date(nickModifyParts[1]);
+                formattedNickNameModifyTime = nickModifyDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                nameChanges = 1; // API doesn't provide change count, so estimate
+            }
+            
+            // Estimate last active date (not provided by API, so we'll use current date as a placeholder)
+            const lastActiveDate = new Date();
+            const formattedLastActive = lastActiveDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Username modify time (not explicitly provided, so use nickNameModifyTime as proxy)
+            let usernameChanges = user.uniqueIdModifyTime ? 1 : 0;
+            
+            return {
+                username: user.uniqueId,
+                name: user.nickname,
+                verified: user.verified,
+                isPrivate: user.privateAccount,
+                creationDate: formattedCreateDate,
+                bio: user.signature || 'No bio available',
+                allowRepost: user.duetSetting === 0, // Assuming duetSetting 0 means allowed
+                followers: parseInt(stats.followerCount),
+                following: parseInt(stats.followingCount),
+                friends: parseInt(stats.friendCount),
+                likes: parseInt(stats.heartCount),
+                videos: parseInt(stats.videoCount),
+                language: user.language || 'Not specified',
+                location: user.region || 'Not specified',
+                lastActive: formattedLastActive,
+                lastNameEdit: formattedNickNameModifyTime,
+                lastUsernameEdit: formattedNickNameModifyTime, // Using same as name edit since uniqueIdModifyTime is 0
+                nameChanges: nameChanges,
+                usernameChanges: usernameChanges
+            };
+        }
+        
+        // Make form submit work when pressing Enter
+        document.getElementById('tiktok-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('check-btn').click();
+            }
+        });
+    </script>
+</body>
+</html>

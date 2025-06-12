@@ -1,0 +1,5 @@
+{
+    "routes": [
+        { "src": "/tiktok", "dest": "/api/tiktok.js" }
+    ]
+}
