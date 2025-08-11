@@ -18,6 +18,11 @@ GET /tiktok/
 
 > **Lưu ý:** Bạn chỉ cần cung cấp `username`, `link` hoặc `user_id`.
 
+## Example API Request  
+```plaintext  
+https://info-tiktok-user.vercel.app/tiktok?input=tiktok
+```  
+
 ## Phản hồi
 
 ### Thành công (HTTP 200)
