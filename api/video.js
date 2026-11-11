@@ -109,6 +109,42 @@ function getImageUrls(images) {
         .filter((image) => /^https?:\/\//i.test(image));
 }
 
+async function downloadVideoMedia(url, filename, button) {
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.classList.add("opacity-60");
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải...';
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Tải file thất bại (${response.status}).`);
+
+        const blob = await response.blob();
+        const file = new File([blob], filename, { type: blob.type || "application/octet-stream" });
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+            || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (isIOS && navigator.share && navigator.canShare?.({ files: [file] })) {
+            await navigator.share({ files: [file], title: filename });
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+        window.alert("Không thể tải trực tiếp file này. Máy chủ TikTok có thể đang chặn CORS.");
+    } finally {
+        button.disabled = false;
+        button.classList.remove("opacity-60");
+        button.innerHTML = originalContent;
+    }
+}
+
 async function copyVideoUsername(username, element) {
     const value = `@${username}`;
     try {
@@ -148,20 +184,14 @@ function renderVideo(video) {
     const musicUrl = video.music || music.play_url || music.url;
     const imageUrls = getImageUrls(video.images);
     const isImagePost = imageUrls.length > 0;
-    const downloadVideoUrl = videoUrl
-        ? `https://api.zm.io.vn/download/?url=${videoUrl}&extension=mp4&name=duyvinh09&quality=video`
-        : "";
-    const audioUrl = musicUrl
-        ? `https://api.zm.io.vn/download/?url=${musicUrl}&extension=mp3&name=duyvinh09&quality=audio`
-        : "";
     const duration = Number(video.duration) > 0
         ? formatDuration(video.duration)
         : `Nhạc: ${formatDuration(music.duration)}`;
     const size = formatFileSize(video.size);
     const previewUrl = isImagePost ? imageUrls[0] : (video.cover || video.origin_cover || "");
     const mediaActions = isImagePost
-        ? `<div class="mt-6"><p class="mb-3 text-sm font-semibold"><i class="fa-solid fa-images mr-2 text-cyan-300"></i>Ảnh trong bài đăng (${imageUrls.length})</p><div class="grid grid-cols-2 gap-3 sm:grid-cols-3">${imageUrls.map((image, index) => `<div class="overflow-hidden rounded-xl border border-slate-700/60 bg-slate-950/40"><button type="button" class="image-preview block w-full cursor-zoom-in" data-image-url="${videoEscapeHtml(image)}" data-image-alt="Ảnh ${index + 1}"><img src="${videoEscapeHtml(image)}" class="aspect-square w-full object-cover transition duration-300 hover:scale-105" alt="Ảnh ${index + 1}" loading="lazy"></button><a href="${videoEscapeHtml(image)}" target="_blank" rel="noopener" download class="flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-400/10"><i class="fa-solid fa-download"></i>Tải ảnh ${index + 1}</a></div>`).join("")}</div></div>`
-        : `<a href="${videoEscapeHtml(downloadVideoUrl || "#")}" target="_blank" rel="noopener" download class="gradient-button mt-4 inline-flex items-center rounded-xl px-5 py-3 text-sm font-bold"><i class="fa-solid fa-download mr-2"></i>Tải video</a>`;
+        ? `<div class="mt-6"><p class="mb-3 text-sm font-semibold"><i class="fa-solid fa-images mr-2 text-cyan-300"></i>Ảnh trong bài đăng (${imageUrls.length})</p><div class="grid grid-cols-2 gap-3 sm:grid-cols-3">${imageUrls.map((image, index) => `<div class="overflow-hidden rounded-xl border border-slate-700/60 bg-slate-950/40"><button type="button" class="image-preview block w-full cursor-zoom-in" data-image-url="${videoEscapeHtml(image)}" data-image-alt="Ảnh ${index + 1}"><img src="${videoEscapeHtml(image)}" class="aspect-square w-full object-cover transition duration-300 hover:scale-105" alt="Ảnh ${index + 1}" loading="lazy"></button><button type="button" class="direct-download flex w-full items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-400/10" data-download-url="${videoEscapeHtml(image)}" data-download-filename="tiktok-image-${index + 1}.jpg"><i class="fa-solid fa-download"></i>Tải ảnh ${index + 1}</button></div>`).join("")}</div></div>`
+        : (videoUrl ? `<button type="button" class="gradient-button direct-download mt-4 inline-flex items-center rounded-xl px-5 py-3 text-sm font-bold" data-download-url="${videoEscapeHtml(videoUrl)}" data-download-filename="tiktok-video.mp4"><i class="fa-solid fa-download mr-2"></i>Tải video</button>` : "");
 
     document.querySelector("#video-result").innerHTML = `<div class="fade-in overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-950/40">
         <div class="grid items-start gap-5 p-5 sm:grid-cols-[180px_1fr]">
@@ -189,11 +219,14 @@ function renderVideo(video) {
                     ${videoDetail("Quảng cáo", video.is_ad === true ? "Có" : "Không", "fa-bullhorn text-red-300")}
                 </div>
                 ${mediaActions}
-                ${audioUrl ? `<a href="${videoEscapeHtml(audioUrl)}" target="_blank" rel="noopener" download class="mt-4 inline-flex items-center rounded-xl border border-cyan-400/40 px-5 py-3 text-sm font-bold text-cyan-200 transition hover:bg-cyan-400/10"><i class="fa-solid fa-music mr-2"></i>Tải MP3</a>` : ""}
+                ${musicUrl ? `<button type="button" class="direct-download mt-4 inline-flex items-center rounded-xl border border-cyan-400/40 px-5 py-3 text-sm font-bold text-cyan-200 transition hover:bg-cyan-400/10" data-download-url="${videoEscapeHtml(musicUrl)}" data-download-filename="tiktok-audio.mp3"><i class="fa-solid fa-music mr-2"></i>Tải MP3</button>` : ""}
             </div>
         </div>
     </div>`;
     document.querySelector("#video-result").classList.remove("hidden");
+    document.querySelectorAll("#video-result .direct-download").forEach((button) => {
+        button.addEventListener("click", () => downloadVideoMedia(button.dataset.downloadUrl, button.dataset.downloadFilename, button));
+    });
     const usernameButton = document.querySelector("#video-result .video-username");
     const lookupButton = document.querySelector("#video-result .lookup-video-user");
     usernameButton?.addEventListener("click", () => copyVideoUsername(username, usernameButton));

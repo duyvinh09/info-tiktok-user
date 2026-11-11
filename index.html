@@ -56,25 +56,12 @@
 
             <section class="glass mx-auto mt-10 max-w-4xl overflow-hidden rounded-3xl shadow-2xl shadow-black/30">
                 <nav class="grid grid-cols-2 gap-2 border-b border-slate-700/50 p-2" aria-label="Công cụ">
-                    <button class="tab-active flex items-center justify-center gap-2 rounded-xl px-3 py-3.5 text-center text-xs font-bold transition sm:text-sm" data-tab="profile"><i class="fa-solid fa-user text-pink-200"></i><span>Thông tin tài khoản</span></button>
-                    <button class="flex items-center justify-center gap-2 rounded-xl px-3 py-3.5 text-center text-xs font-bold text-slate-400 transition hover:bg-white/5 hover:text-white sm:text-sm" data-tab="video"><i class="fa-solid fa-clapperboard text-cyan-300"></i><span>Thông tin & tải video</span></button>
+                    <button class="tab-active flex items-center justify-center gap-2 rounded-xl px-3 py-3.5 text-center text-xs font-bold transition sm:text-sm" data-tab="video"><i class="fa-solid fa-clapperboard text-cyan-300"></i><span>Thông tin & tải video</span></button>
+                    <button class="flex items-center justify-center gap-2 rounded-xl px-3 py-3.5 text-center text-xs font-bold text-slate-400 transition hover:bg-white/5 hover:text-white sm:text-sm" data-tab="profile"><i class="fa-solid fa-user text-pink-200"></i><span>Thông tin tài khoản</span></button>
                 </nav>
 
                 <div class="p-5 sm:p-8">
-                    <div id="profile-panel" data-panel="profile">
-                        <form id="profile-form">
-                            <label for="profile-input" class="mb-2 block text-sm font-medium text-slate-300">Link, username hoặc ID TikTok</label>
-                            <div class="flex flex-col gap-3 sm:flex-row">
-                                <input id="profile-input" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-600 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20" placeholder="@username hoặc https://www.tiktok.com/@username" autocomplete="off">
-                                <button class="gradient-button rounded-xl px-6 py-3.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60" type="submit"><i class="fa-solid fa-magnifying-glass mr-2"></i>Tra cứu</button>
-                            </div>
-                        </form>
-                        <p class="mt-3 text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i> Ví dụ: <button class="example-link text-cyan-300 hover:underline" data-target="profile-input">@tiktok</button></p>
-                        <div id="profile-status" class="mt-6 hidden"></div>
-                        <div id="profile-result" class="mt-6 hidden"></div>
-                    </div>
-
-                    <div id="video-panel" class="hidden" data-panel="video">
+                    <div id="video-panel" data-panel="video">
                         <form id="video-form">
                             <label for="video-input" class="mb-2 block text-sm font-medium text-slate-300">Đường dẫn video TikTok</label>
                             <div class="flex flex-col gap-3 sm:flex-row">
@@ -85,6 +72,19 @@
                         <p class="mt-3 text-xs text-slate-500"><i class="fa-solid fa-shield-halved mr-1"></i> Chỉ tải nội dung bạn có quyền sử dụng.</p>
                         <div id="video-status" class="mt-6 hidden"></div>
                         <div id="video-result" class="mt-6 hidden"></div>
+                    </div>
+
+                    <div id="profile-panel" class="hidden" data-panel="profile">
+                        <form id="profile-form">
+                            <label for="profile-input" class="mb-2 block text-sm font-medium text-slate-300">Link, username hoặc ID TikTok</label>
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <input id="profile-input" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-600 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20" placeholder="@username hoặc https://www.tiktok.com/@username" autocomplete="off">
+                                <button class="gradient-button rounded-xl px-6 py-3.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60" type="submit"><i class="fa-solid fa-magnifying-glass mr-2"></i>Tra cứu</button>
+                            </div>
+                        </form>
+                        <p class="mt-3 text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i> Ví dụ: <button class="example-link text-cyan-300 hover:underline" data-target="profile-input">@tiktok</button></p>
+                        <div id="profile-status" class="mt-6 hidden"></div>
+                        <div id="profile-result" class="mt-6 hidden"></div>
                     </div>
                 </div>
             </section>
