@@ -109,6 +109,36 @@ function getImageUrls(images) {
         .filter((image) => /^https?:\/\//i.test(image));
 }
 
+async function copyVideoUsername(username, element) {
+    const value = `@${username}`;
+    try {
+        await navigator.clipboard.writeText(value);
+        const original = element.textContent;
+        element.textContent = "Đã copy!";
+        element.classList.add("text-emerald-300");
+        window.setTimeout(() => {
+            element.textContent = original;
+            element.classList.remove("text-emerald-300");
+        }, 1400);
+    } catch {
+        element.textContent = "Không thể copy";
+        window.setTimeout(() => {
+            element.textContent = value;
+        }, 1400);
+    }
+}
+
+function lookupVideoUsername(username) {
+    const profileTab = document.querySelector('[data-tab="profile"]');
+    const profileInput = document.querySelector("#profile-input");
+    const profileForm = document.querySelector("#profile-form");
+    if (!profileTab || !profileInput || !profileForm) return;
+
+    profileInput.value = username;
+    profileTab.click();
+    profileForm.requestSubmit();
+}
+
 function renderVideo(video) {
     const author = video.author || {};
     const music = video.music_info || {};
@@ -138,7 +168,11 @@ function renderVideo(video) {
             <div class="mx-auto w-full max-w-none overflow-hidden rounded-xl bg-black sm:mx-0 sm:aspect-[9/16] sm:w-[180px]"><img src="${videoEscapeHtml(previewUrl)}" onerror="this.style.display='none'" class="h-auto max-h-80 w-full object-contain sm:h-full" alt="${isImagePost ? "Ảnh bài đăng" : "Ảnh xem trước video"}"></div>
             <div class="flex flex-col justify-center">
                 <h2 class="text-lg font-bold">${videoEscapeHtml(video.title || "Video TikTok")}</h2>
-                <p class="mt-2 text-sm text-slate-400">${videoEscapeHtml(username ? `@${username} · ${authorName}` : authorName)}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+                    ${username
+                        ? `<button type="button" class="video-username cursor-copy text-cyan-300 transition hover:text-cyan-200" title="Bấm để copy username">@${videoEscapeHtml(username)}</button><span aria-hidden="true">·</span><span>${videoEscapeHtml(authorName)}</span><button type="button" class="lookup-video-user rounded-lg border border-cyan-400/30 px-2.5 py-1 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-400/10" title="Tra cứu thông tin tài khoản"><i class="fa-solid fa-magnifying-glass mr-1"></i>Tra cứu</button>`
+                        : videoEscapeHtml(authorName)}
+                </div>
                 <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
                     ${videoDetail("Lượt xem", videoFormatNumber(video.play_count), "fa-play text-cyan-300")}
                     ${videoDetail("Lượt tim", videoFormatNumber(video.digg_count), "fa-heart text-pink-400")}
@@ -160,6 +194,10 @@ function renderVideo(video) {
         </div>
     </div>`;
     document.querySelector("#video-result").classList.remove("hidden");
+    const usernameButton = document.querySelector("#video-result .video-username");
+    const lookupButton = document.querySelector("#video-result .lookup-video-user");
+    usernameButton?.addEventListener("click", () => copyVideoUsername(username, usernameButton));
+    lookupButton?.addEventListener("click", () => lookupVideoUsername(username));
     document.querySelectorAll("#video-result .image-preview").forEach((button) => {
         button.addEventListener("click", () => openImageLightbox(button.dataset.imageUrl, button.dataset.imageAlt));
     });
