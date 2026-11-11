@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title>TikTokTools</title>
+  <rect width="256" height="256" rx="58" fill="#121a2b"/>
+  <path d="M151 45v99a31 31 0 1 1-25-30V83c-10 8-22 12-36 12V69c18 0 32-6 43-24h18v100a12 12 0 1 0 12-12V45h-12z" fill="#25f4ee" opacity=".9" transform="translate(-7 4)"/>
+  <path d="M151 45v99a31 31 0 1 1-25-30V83c-10 8-22 12-36 12V69c18 0 32-6 43-24h18v100a12 12 0 1 0 12-12V45h-12z" fill="#fe2c55" opacity=".9" transform="translate(7 -4)"/>
+  <path d="M151 45v99a31 31 0 1 1-25-30V83c-10 8-22 12-36 12V69c18 0 32-6 43-24h18v100a12 12 0 1 0 12-12V45h-12z" fill="#fff"/>
+</svg>
