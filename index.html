@@ -65,7 +65,10 @@
                         <form id="video-form">
                             <label for="video-input" class="mb-2 block text-sm font-medium text-slate-300">Đường dẫn video TikTok</label>
                             <div class="flex flex-col gap-3 sm:flex-row">
-                                <input id="video-input" type="url" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20" placeholder="https://www.tiktok.com/@user/video/..." autocomplete="off">
+                                <div class="relative min-w-0 flex-1">
+                                    <input id="video-input" type="url" class="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3.5 pr-20 text-sm outline-none transition placeholder:text-slate-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/20" placeholder="https://www.tiktok.com/@user/video/..." autocomplete="off">
+                                    <button type="button" class="absolute inset-y-1 right-1 rounded-lg border border-cyan-300/20 bg-cyan-400/10 px-3 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-400/20 hover:text-cyan-100" data-paste-target="video-input"><i class="fa-solid fa-paste mr-1"></i>Dán</button>
+                                </div>
                                 <button class="gradient-button rounded-xl px-6 py-3.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60" type="submit"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Xem video</button>
                             </div>
                         </form>
@@ -78,7 +81,10 @@
                         <form id="profile-form">
                             <label for="profile-input" class="mb-2 block text-sm font-medium text-slate-300">Link, username hoặc ID TikTok</label>
                             <div class="flex flex-col gap-3 sm:flex-row">
-                                <input id="profile-input" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3.5 text-sm outline-none transition placeholder:text-slate-600 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20" placeholder="@username hoặc https://www.tiktok.com/@username" autocomplete="off">
+                                <div class="relative min-w-0 flex-1">
+                                    <input id="profile-input" class="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3.5 pr-20 text-sm outline-none transition placeholder:text-slate-600 focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20" placeholder="@username hoặc https://www.tiktok.com/@username" autocomplete="off">
+                                    <button type="button" class="absolute inset-y-1 right-1 rounded-lg border border-pink-300/20 bg-pink-400/10 px-3 text-sm font-semibold text-pink-200 transition hover:bg-pink-400/20 hover:text-pink-100" data-paste-target="profile-input"><i class="fa-solid fa-paste mr-1"></i>Dán</button>
+                                </div>
                                 <button class="gradient-button rounded-xl px-6 py-3.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60" type="submit"><i class="fa-solid fa-magnifying-glass mr-2"></i>Tra cứu</button>
                             </div>
                         </form>
@@ -128,6 +134,15 @@
             document.querySelectorAll("[data-panel]").forEach((panel) => panel.classList.toggle("hidden", panel.dataset.panel !== tab.dataset.tab));
         }));
         document.querySelectorAll(".example-link").forEach((button) => button.addEventListener("click", () => { $(`#${button.dataset.target}`).value = button.textContent; }));
+        document.querySelectorAll("[data-paste-target]").forEach((button) => button.addEventListener("click", async () => {
+            const input = $(`#${button.dataset.pasteTarget}`);
+            try {
+                input.value = await navigator.clipboard.readText();
+                input.focus();
+            } catch {
+                setStatus(`#${button.dataset.pasteTarget === "video-input" ? "video" : "profile"}-status`, "Không thể đọc clipboard. Hãy cấp quyền clipboard hoặc dán thủ công bằng Ctrl+V.", "error");
+            }
+        }));
 
         $("#profile-form").addEventListener("submit", async (event) => {
             event.preventDefault();

@@ -137,7 +137,9 @@ async function downloadVideoMedia(url, filename, button) {
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     } catch (error) {
-        window.alert("Không thể tải trực tiếp file này. Máy chủ TikTok có thể đang chặn CORS.");
+        if (error?.name !== "AbortError") {
+            window.alert("Không thể tải trực tiếp file này. Máy chủ TikTok có thể đang chặn CORS.");
+        }
     } finally {
         button.disabled = false;
         button.classList.remove("opacity-60");
