@@ -111,6 +111,7 @@ function getImageUrls(images) {
 
 async function downloadVideoMedia(url, filename, button) {
     const originalContent = button.innerHTML;
+    let completed = false;
     button.disabled = true;
     button.classList.add("opacity-60");
     button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải...';
@@ -125,6 +126,7 @@ async function downloadVideoMedia(url, filename, button) {
             || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
         if (isIOS && navigator.share && navigator.canShare?.({ files: [file] })) {
             await navigator.share({ files: [file], title: filename });
+            completed = true;
             return;
         }
 
@@ -136,9 +138,74 @@ async function downloadVideoMedia(url, filename, button) {
         link.click();
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        completed = true;
     } catch (error) {
-        if (error?.name !== "AbortError") {
+        if (!["AbortError", "NotAllowedError"].includes(error?.name)) {
             window.alert("Không thể tải trực tiếp file này. Máy chủ TikTok có thể đang chặn CORS.");
+        }
+    } finally {
+        button.disabled = false;
+        button.classList.remove("opacity-60");
+        if (completed) {
+            button.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Đã tải';
+            button.classList.add("text-emerald-300");
+            window.setTimeout(() => {
+                if (button.isConnected) {
+                    button.innerHTML = originalContent;
+                    button.classList.remove("text-emerald-300");
+                }
+            }, 3000);
+        } else {
+            button.innerHTML = originalContent;
+        }
+    }
+}
+
+async function downloadAllImages(images, button) {
+    const originalContent = button.innerHTML;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    button.disabled = true;
+    button.classList.add("opacity-60");
+
+    try {
+        for (let index = 0; index < images.length; index += 1) {
+            button.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang tải ${index + 1}/${images.length}...`;
+            const response = await fetch(images[index]);
+            if (!response.ok) throw new Error(`Tải ảnh thất bại (${response.status}).`);
+
+            const blob = await response.blob();
+            const filename = `tiktok-image-${index + 1}.jpg`;
+            const file = new File([blob], filename, { type: blob.type || "image/jpeg" });
+            if (isIOS && navigator.share && navigator.canShare?.({ files: [file] })) {
+                await navigator.share({ files: [file], title: filename });
+            } else {
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = objectUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+                await new Promise((resolve) => window.setTimeout(resolve, 250));
+            }
+            const imageButton = document.querySelector(`#video-result button[data-download-filename="${filename}"]`);
+            if (imageButton) {
+                const originalImageContent = imageButton.innerHTML;
+                imageButton.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Đã tải';
+                imageButton.classList.add("text-emerald-300");
+                window.setTimeout(() => {
+                    if (imageButton.isConnected) {
+                        imageButton.innerHTML = originalImageContent;
+                        imageButton.classList.remove("text-emerald-300");
+                    }
+                }, 3000);
+            }
+        }
+    } catch (error) {
+        if (!["AbortError", "NotAllowedError"].includes(error?.name)) {
+            window.alert("Không thể tải toàn bộ ảnh. Máy chủ TikTok có thể đang chặn CORS.");
         }
     } finally {
         button.disabled = false;
@@ -175,6 +242,29 @@ function lookupVideoUsername(username) {
     profileInput.value = username;
     profileTab.click();
     profileForm.requestSubmit();
+}
+
+function setupMusicPlayer() {
+    const player = document.querySelector("#video-result .music-player");
+    const audio = player?.querySelector("audio");
+    const playButton = player?.querySelector(".music-play");
+    if (!player || !audio || !playButton) return;
+
+    playButton.addEventListener("click", async () => {
+        if (audio.paused) {
+            await audio.play();
+        } else {
+            audio.pause();
+        }
+    });
+    audio.addEventListener("play", () => {
+        playButton.querySelector("i").className = "fa-solid fa-pause mr-2";
+        playButton.querySelector("span").textContent = "Đang phát";
+    });
+    audio.addEventListener("pause", () => {
+        playButton.querySelector("i").className = "fa-solid fa-play mr-2";
+        playButton.querySelector("span").textContent = "Nghe nhạc";
+    });
 }
 
 function renderVideo(video) {
@@ -221,7 +311,8 @@ function renderVideo(video) {
                     ${videoDetail("Quảng cáo", video.is_ad === true ? "Có" : "Không", "fa-bullhorn text-red-300")}
                 </div>
                 ${mediaActions}
-                ${musicUrl ? `<button type="button" class="direct-download mt-4 inline-flex items-center rounded-xl border border-cyan-400/40 px-5 py-3 text-sm font-bold text-cyan-200 transition hover:bg-cyan-400/10" data-download-url="${videoEscapeHtml(musicUrl)}" data-download-filename="tiktok-audio.mp3"><i class="fa-solid fa-music mr-2"></i>Tải MP3</button>` : ""}
+                ${isImagePost ? `<button type="button" class="download-all-images mt-4 inline-flex items-center rounded-xl border border-pink-400/40 px-5 py-3 text-sm font-bold text-pink-200 transition hover:bg-pink-400/10"><i class="fa-solid fa-images mr-2"></i>Tải tất cả ảnh</button>` : ""}
+                ${musicUrl ? `<div class="music-player mt-4 flex items-center overflow-hidden rounded-xl border border-cyan-400/30 bg-slate-950/30"><audio class="hidden" preload="metadata" src="${videoEscapeHtml(musicUrl)}">Trình duyệt không hỗ trợ phát nhạc.</audio><button type="button" class="music-play flex min-w-0 flex-1 items-center px-4 py-3 text-left text-sm font-semibold text-cyan-200 transition hover:bg-cyan-400/10"><i class="fa-solid fa-play mr-2"></i><span>Nghe nhạc</span></button><button type="button" class="direct-download border-l border-cyan-400/20 px-4 py-3 text-cyan-200 transition hover:bg-cyan-400/10" data-download-url="${videoEscapeHtml(musicUrl)}" data-download-filename="tiktok-audio.mp3" aria-label="Tải nhạc"><i class="fa-solid fa-download"></i></button></div>` : ""}
             </div>
         </div>
     </div>`;
@@ -229,6 +320,10 @@ function renderVideo(video) {
     document.querySelectorAll("#video-result .direct-download").forEach((button) => {
         button.addEventListener("click", () => downloadVideoMedia(button.dataset.downloadUrl, button.dataset.downloadFilename, button));
     });
+    document.querySelector("#video-result .download-all-images")?.addEventListener("click", (event) => {
+        downloadAllImages(imageUrls, event.currentTarget);
+    });
+    setupMusicPlayer();
     const usernameButton = document.querySelector("#video-result .video-username");
     const lookupButton = document.querySelector("#video-result .lookup-video-user");
     usernameButton?.addEventListener("click", () => copyVideoUsername(username, usernameButton));
